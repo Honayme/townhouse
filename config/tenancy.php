@@ -105,7 +105,7 @@ return [
          * @see
          * @info set to true to enable.
          */
-        'auto-delete-tenant-directory' => false,
+        'auto-delete-tenant-directory' => env('AUTO_DELETE_TENANT_DIRECTORY', false),
 
         /**
          * Time to cache websites in minutes. Set to false to disable.
