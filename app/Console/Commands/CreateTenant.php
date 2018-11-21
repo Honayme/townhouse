@@ -15,23 +15,21 @@ class CreateTenant extends Command
 {
     protected $signature = 'tenant:create {fqdn} {name} {email}';
     protected $description = 'Creates a tenant with the provided fqdn address e.g. php artisan tenant:create sub.example.com';
-
     public function handle()
     {
         $name = $this->argument('name');
         $email = $this->argument('email');
         $fqdn = $this->argument('fqdn');
+        $password = "toto";
 
         if ($this->tenantExists($fqdn)) {
             $this->error("A tenant with name '{$fqdn}'");
             return;
         }
 
-        $hostname = $this->registerTenant($fqdn);
+        $hostname = $this->registerTenant($fqdn, $name, $email, $password);
         app(Environment::class)->hostname($hostname);
-        // we'll create a random secure password for our to-be admin
-        $password = "toto";
-        $this->addAdmin($name, $email, $password);
+
         $this->info("Tenant '{$name}' is created and is now accessible at {$hostname->fqdn}");
         $this->info("Admin {$email} can log in using password {$password}");
     }
@@ -42,7 +40,7 @@ class CreateTenant extends Command
         return Hostname::where('fqdn', $fqdn)->exists();
     }
 
-    private function registerTenant($fqdn)
+    private function registerTenant($fqdn, $name, $email, $password)
     {
         $website = new Website;
         $website->hostnames();
@@ -50,15 +48,21 @@ class CreateTenant extends Command
 
         // associate the website with a hostname
         $hostname = new Hostname;
-        $baseUrl = config('APP_URL');
-        $hostname->fqdn = "{$fqdn}.housetown";
+        $baseUrl = env('APP_URL');
+        $hostname->fqdn = "{$fqdn}.{$baseUrl}";
         app(HostnameRepository::class)->attach($hostname, $website);
+        $this->addAdmin($website, $name, $email, $password);
         return $hostname;
     }
 
-    private function addAdmin($name, $email, $password)
+    private function addAdmin($website, $name, $email, $password)
     {
+        $tenancy = app(Environment::class);
+        $tenancy->tenant($website); // switches the tenant and reconfigures the app
+
         $admin = User::create(['name' => $name, 'email' => $email, 'password' => Hash::make($password)]);
+        $admin->guard_name = 'web';
+        $admin->assignRole('admin');
         return $admin;
     }
 }
