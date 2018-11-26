@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Notifications\TenantCreated;
 use App\User;
 use Hyn\Tenancy\Contracts\Repositories\HostnameRepository;
 use Hyn\Tenancy\Contracts\Repositories\WebsiteRepository;
@@ -31,7 +32,7 @@ class CreateTenant extends Command
         app(Environment::class)->hostname($hostname);
 
         $this->info("Tenant '{$name}' is created and is now accessible at {$hostname->fqdn}");
-        $this->info("Admin {$email} can log in using password {$password}");
+        $this->info("Admin {$email} has been invited");
     }
 
 
@@ -51,7 +52,9 @@ class CreateTenant extends Command
         $baseUrl = env('APP_URL');
         $hostname->fqdn = "{$fqdn}.{$baseUrl}";
         app(HostnameRepository::class)->attach($hostname, $website);
-        $this->addAdmin($website, $name, $email, $password);
+        $this->addAdmin($website, $name, $email, $password)
+             ->notify(new TenantCreated($hostname));
+
         return $hostname;
     }
 
