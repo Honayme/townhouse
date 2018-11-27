@@ -1,5 +1,6 @@
 <?php
 namespace App\Console\Commands;
+use App\Tenant;
 use Hyn\Tenancy\Contracts\Repositories\HostnameRepository;
 use Hyn\Tenancy\Contracts\Repositories\WebsiteRepository;
 use Hyn\Tenancy\Models\Hostname;
@@ -12,13 +13,19 @@ class DeleteTenant extends Command
     {
         // because this is a destructive command, we'll only allow to run this command
         // if you are on the local environment
-        if (!app()->isLocal()) {
+        if (!(app()->isLocal() || app()->runningUnitTests())) {
             $this->error('This command is only available on the local environment.');
             return;
         }
 
         $fqdn = $this->argument('fqdn');
-        $this->deleteTenant($fqdn);
+        if ($tenant = Tenant::retrieveBy($fqdn)){
+            $tenant->delete($fqdn);
+            $this->info("Tenant {$fqdn} successfully deleted.");
+        }else {
+            $this->error('This fqdn doesn\'t exist.');
+        }
+
     }
     private function deleteTenant($fqdn)
     {
