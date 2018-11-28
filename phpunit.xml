@@ -29,5 +29,7 @@
         <env name="MAIL_DRIVER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <env name="DB_DATABASE" value="tenancy_test"/>
+        <env name="TENANCY_AUTO_HOSTNAME_IDENTIFICATION" value="false"/>
     </php>
 </phpunit>

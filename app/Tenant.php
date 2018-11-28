@@ -19,7 +19,7 @@ class Tenant
         $this->hostname = $hostname;
         $this->admin = $admin;
     }
-    public function delete($fqdn)
+    public function delete($fqdn): void
     {
         if ($tenant = Hostname::where('fqdn', $fqdn)->firstOrFail()) {
             $tenant->website->delete();
@@ -41,7 +41,7 @@ class Tenant
 
         // make hostname current
         app(Environment::class)->hostname($hostname);
-        $admin = static::makeAdmin($website, $name, $email, "toto");
+        $admin = static::makeAdmin($website, $name, $email, 'toto');
         return new Tenant($website, $hostname, $admin); // Changer le constructeur plus haut
     }
     private static function makeAdmin($website, $name, $email, $password): User

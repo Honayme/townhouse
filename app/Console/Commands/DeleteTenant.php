@@ -2,7 +2,6 @@
 namespace App\Console\Commands;
 use App\Tenant;
 use Hyn\Tenancy\Contracts\Repositories\HostnameRepository;
-use Hyn\Tenancy\Contracts\Repositories\WebsiteRepository;
 use Hyn\Tenancy\Models\Hostname;
 use Illuminate\Console\Command;
 class DeleteTenant extends Command
